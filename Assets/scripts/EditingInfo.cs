@@ -34,8 +34,7 @@ public class EditingInfo : MonoBehaviour {
 	GameObject Sure;
 	 GameObject parent;
 
-	float OffsetX;
-	float OffsetY;
+
 
 
 	public void Start(){
@@ -55,19 +54,7 @@ public class EditingInfo : MonoBehaviour {
 		
 
 	}
-	public void t1(){
-		if (Input.touchCount >= 1)
-			timer += 1;
 
-		if (timer == 19 && c==0) {
-			SureCanvas ();
-			c++;
-			timer = 0;
-		}
-	}
-	public void t2(){
-		timer = 0;
-	}
 
 	public void InstSprite(GameObject i){
 		SpriteImage.GetComponent<Text> ().text = pos;

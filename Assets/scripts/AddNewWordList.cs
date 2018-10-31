@@ -16,21 +16,53 @@ public class AddNewWordList : MonoBehaviour {
 	public GameObject OptionsParent;
 	public GameObject Information;
 	public GameObject meObject;
+
+	public int Dropdown;
 	// Use this for initialization
 	void Start () {
+		
+		StartMethod0 ();
 		Load ();
 		StartMethod ();
+
 	}
 	public GameObject SureCanvas;
 
 
+
+	public void StartMethod0(){
+		if (File.Exists (Application.persistentDataPath + "/WordLists.fl")) {
+			BinaryFormatter bf1 = new BinaryFormatter ();
+			FileStream TestFile3 = File.Open (Application.persistentDataPath + "/WordLists.fl", FileMode.Open);
+
+			List<string> Wr = (List<string>)bf1.Deserialize (TestFile3);
+			TestFile3.Close ();
+			File.Delete (Application.persistentDataPath +  "/WordLists.fl");
+
+			if (!Wr [0] [2].Equals ("1")) {
+				Debug.Log ("yes");
+				FileStream TestFile4 = File.Create (Application.persistentDataPath + "/WordLists1.fl");
+				List<string[]> Word1 = new List<string[]> ();
+
+				for (int i = 0; i < Wr.Count; i++) {
+					string[] op = new string[3]{ Wr [i], "0", "1" };
+					Word1.Add (op);
+				}
+				bf1.Serialize (TestFile4, Word1);
+				TestFile4.Close ();
+			}
+		}
+	}
+
+
 	public void StartMethod(){
-		if (!File.Exists (Application.persistentDataPath + "/WordLists.fl")) {
+		if (!File.Exists (Application.persistentDataPath + "/WordLists1.fl")) {
+			
+			BinaryFormatter bf = new BinaryFormatter ();
+
 			if(File.Exists(Application.persistentDataPath+"/word.fl") && File.Exists(Application.persistentDataPath+"/POS.fl")){
-				AddNew ("word");
-
-				BinaryFormatter bf = new BinaryFormatter ();
-
+				AddNew ("word",0);
+			
 				FileStream  TestFile1 = File.Open (Application.persistentDataPath +  "/word.fl", FileMode.Open);
 				FileStream  TestFile2 = File.Open (Application.persistentDataPath +  "/POS.fl", FileMode.Open);
 				List<string[]> Word =(List<string[]>)bf.Deserialize (TestFile1);
@@ -51,7 +83,10 @@ public class AddNewWordList : MonoBehaviour {
 			}
 		
 		}
+
 	}
+
+
 
 	public void InstInf(){
 		GameObject i = Instantiate (Information);
@@ -59,7 +94,7 @@ public class AddNewWordList : MonoBehaviour {
 	}
 
 
-	List<string> mas= new List<string>();
+	List<string[]> mas= new List<string[]>();
 	List<GameObject> mas2 = new List<GameObject> ();
 
 	public void InstNew(){
@@ -100,15 +135,18 @@ public class AddNewWordList : MonoBehaviour {
 			TestFile1.Close ();
 
 		}
-		mas [Integer] = op;
+		mas [Integer][0] = op;
+		mas [Integer] [1] = Dropdown.ToString ();
+		Debug.Log (mas [0] [0] + " " + mas [0] [1]);
 		mas2 [Integer].GetComponent<ButtonClick> ().text.text = op;
+		mas2 [Integer].GetComponent<ButtonClick> ().Theme = Dropdown;
 
-		List<string> Word1 = new List<string>();
-		FileStream  TestFile3 = File.Open (Application.persistentDataPath +  "/WordLists.fl", FileMode.Open);
+		List<string[]> Word1 = new List<string[]>();
+		FileStream  TestFile3 = File.Open (Application.persistentDataPath +  "/WordLists1.fl", FileMode.Open);
 		for (int i = 0; i < mas.Count; i++) {
 			
-			string qw = mas [i];
 
+			string[] qw = new string[3]{mas [i][0],mas [i][1],mas [i][2]};
 			Word1.Add(qw);
 
 		}
@@ -118,28 +156,42 @@ public class AddNewWordList : MonoBehaviour {
 
 		no ();
 	}
-
-	public void ClickBut(string op,int inp){
-		Name = op;
-		Integer=inp;
+	public void DropInit(int i){
+		mas [Integer] [1] = i.ToString ();
+		mas2 [Integer].GetComponent<ButtonClick> ().Theme = i;
+		Zapolnenie ();
 	}
 
-	public void AddNew(string op){
-		mas.Add (op);
+	public void ClickBut(string op,int inp,int drp){
+		Name = op;
+		Integer=inp;
+		Dropdown = drp;
+	}
+
+	public void AddNew(string op,int drpDown){
+		string[] newq =new string[3]{op,drpDown.ToString (),"1"};
+		mas.Add (newq);
 		Zapolnenie ();
-		AddOption (op);
+		AddOption (op,drpDown);
 	}
 	public void perexod(){
 		if (Name != "") {
 			Saving.NameWordlist = Name;
+			Saving.Dropdown = Dropdown;
 			SceneManager.LoadScene ("mainScene1");
 		}
 	}
 
 	int n;
+	int t;
 	public void Delete(string op){
 		bool a = false;
-			int t = mas.IndexOf(op);
+
+		for (int i = 0; i < mas.Count; i++) {
+			if(op.Equals(mas[i][0]))
+				t=i;
+		}
+			//int t = mas.IndexOf(op);
 
 		DestroyObject (mas2 [Integer]);
 		mas2.RemoveAt (Integer);
@@ -170,18 +222,18 @@ public class AddNewWordList : MonoBehaviour {
 
 
 	public void Load(){
-		if (File.Exists (Application.persistentDataPath +  "/WordLists.fl")) {
+		if (File.Exists (Application.persistentDataPath +  "/WordLists1.fl")) {
 
 			BinaryFormatter bf = new BinaryFormatter ();
 
-			FileStream  TestFile = File.Open (Application.persistentDataPath +  "/WordLists.fl", FileMode.Open);
+			FileStream  TestFile = File.Open (Application.persistentDataPath +  "/WordLists1.fl", FileMode.Open);
 
-			List<string> Word =(List<string>)bf.Deserialize (TestFile);
+			List<string[]> Word =(List<string[]>)bf.Deserialize (TestFile);
 
 			for (int i = 0; i < Word.Count; i++) {
-
-				mas.Add (Word [i]);
-				AddOption (mas [i]);
+				string[] ui = new string[3]{Word [i][0],Word [i][1],Word [i][2]};
+				mas.Add (ui);
+				AddOption (Word [i][0],int.Parse(Word[i][1]));
 
 			}
 
@@ -195,22 +247,23 @@ public class AddNewWordList : MonoBehaviour {
 	}
 
 
-	public void AddOption(string msop){
+	public void AddOption(string msop,int Theme){
 		GameObject op = Instantiate (Option);
 		op.transform.SetParent (OptionsParent.transform, false);
 		op.GetComponent<ButtonClick> ().text.text = msop;
-		op.GetComponent<ButtonClick> ().Integer = mas2.Count ;
+		op.GetComponent<ButtonClick> ().Integer = mas2.Count;
+		op.GetComponent<ButtonClick> ().Theme= Theme;
 		mas2.Add (op);
 
 	}
 
 	public void Zapolnenie(){
 		
-		List<string> Word = new List<string>();
+		List<string[]> Word = new List<string[]>();
 		BinaryFormatter bf = new BinaryFormatter ();
 
 
-		FileStream  TestFile = File.Create (Application.persistentDataPath + "/WordLists.fl");
+		FileStream  TestFile = File.Create (Application.persistentDataPath + "/WordLists1.fl");
 
 
 
@@ -218,7 +271,7 @@ public class AddNewWordList : MonoBehaviour {
 
 
 
-			string op = mas [i];
+			string[] op = new string[3]{mas [i][0],mas [i][1],mas [i][2]};
 
 			Word.Add(op);
 

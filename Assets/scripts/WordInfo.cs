@@ -21,6 +21,9 @@ public class WordInfo : MonoBehaviour {
 	public GameObject WordWithoutFix;
 	GameObject WordWithoutFixOption;
 
+
+	public GameObject[] Theme =new GameObject[6];
+	public int THEMEint=0;
 	string LoadW;
 
 	 int Count;
@@ -37,17 +40,20 @@ public class WordInfo : MonoBehaviour {
 
 	string NameWordlist;
 
-	public void InitName(string op){
+	public void InitName(string op,int theme){
 		NameWordlist= op;
+		THEMEint = theme;
 	}
 
 	[HideInInspector]
 	public  List<EditingInfo> Mas = new List<EditingInfo> ();
 
 	void Start(){
-		
-		InitName (Saving.NameWordlist);
+
+
+		InitName (Saving.NameWordlist,Saving.Dropdown);
 		NameWordlist = "/" + NameWordlist + ".fl";
+		Theme [THEMEint].SetActive (true);
 		Load (NameWordlist);
 		//LoadWorLists ();
 		//Fix.onClick.AddListener( ClickBut) ;
@@ -63,57 +69,6 @@ public class WordInfo : MonoBehaviour {
 	}
 
 
-
-	public  List<string> Mas1 = new List<string> ();
-
-
-
-	public void NewWordlist (string p){
-
-		string NameWordl = "/"+p+".fl";
-
-		Mas1.Add (NameWordl);
-
-		List<string> WordLists = new List<string>();
-
-		BinaryFormatter bf = new BinaryFormatter ();
-
-
-		FileStream  TestFile = File.Create (Application.persistentDataPath + "/WordLists.fl");
-
-		for(int i=0;i<Mas1.Count;i++){
-
-			string op = Mas1 [i];
-
-			WordLists.Add (op);
-
-
-		}
-		bf.Serialize (TestFile, WordLists);
-
-		TestFile.Close ();
-
-	}
-
-	public void LoadWorLists(){
-		if (File.Exists (Application.persistentDataPath +  "/WordLists.fl")) {
-
-			BinaryFormatter bf = new BinaryFormatter ();
-
-			FileStream  TestFile = File.Open (Application.persistentDataPath +  "/WordLists.fl", FileMode.Open);
-
-			List<string> Word =(List<string>)bf.Deserialize (TestFile);
-
-			for (int i = 0; i < Word.Count; i++) {
-
-				Mas1.Add (Word [i]);
-
-			}
-
-			TestFile.Close ();
-
-		} 
-	}
 
 
 
@@ -157,19 +112,88 @@ public class WordInfo : MonoBehaviour {
 		int t = Mas.IndexOf(img);
 
 		Mas.RemoveAt (t);
-		ZapolnenieFaila (NameWordlist);			//////
+		ZapolnenieFaila (NameWordlist);			
+	}
+	[HideInInspector]
+	public bool Poisk=false;
+	public InputField LookFor;
+	public GameObject Scroll1;
+	public GameObject Scroll2;
+	public GameObject newParent;
+	public void poiskWord(){
+		LookFor.gameObject.SetActive (true);
+		Scroll1.SetActive (false);
+		Scroll2.SetActive (true);
+		Poisk = true;
+		DeleteAll ();
 	}
 
-	public void DeleteAll (){
+
+	public void DeleteAll(){
+
+	}
+	public  List<EditingInfo> Mas1 = new List<EditingInfo> ();
+	public List<GameObject> M1 = new List<GameObject> ();
+	void Update () {
+
+		if (Poisk) {
+
+			//if (Input.GetKey (KeyCode.KeypadEnter)) {
+
+				for (int i=0; i < Mas.Count; i++) {
+				
+				if (Mas[i].word== LookFor.text) {
+						
+					if (Mas1.Count >= 1) {
+						for (int j = 0; j < Mas1.Count; j++) {
+							if (Mas1 [j].word != LookFor.text) {
+								Option = Instantiate (option, option.transform.position, option.transform.localRotation);
+								Option.transform.SetParent (newParent.transform, false);
+								Mas1.Add (Option.GetComponent<EditingInfo> ());
+								M1.Add (Option);
+								Option.GetComponent<EditingInfo> ().word = Mas [i].word;
+								Option.GetComponent<EditingInfo> ().translation = Mas [i].translation;
+								Option.GetComponent<EditingInfo> ().partOfSpeech = Mas [i].partOfSpeech;
+								Option.GetComponent<EditingInfo> ().example = Mas [i].example;
+								Option.GetComponent<EditingInfo> ().Transcription = Mas [i].Transcription;
+							}
+						}
+					} else {
+						Option = Instantiate (option, option.transform.position, option.transform.localRotation);
+						Option.transform.SetParent (newParent.transform, false);
+						Mas1.Add (Option.GetComponent<EditingInfo> ());
+						M1.Add (Option);
+						Option.GetComponent<EditingInfo> ().word = Mas [i].word;
+						Option.GetComponent<EditingInfo> ().translation = Mas [i].translation;
+						Option.GetComponent<EditingInfo> ().partOfSpeech = Mas [i].partOfSpeech;
+						Option.GetComponent<EditingInfo> ().example = Mas [i].example;
+						Option.GetComponent<EditingInfo> ().Transcription = Mas [i].Transcription;
+					}
+					}
 
 
 
+
+			}
+
+
+
+			if (Input.GetKeyUp(KeyCode.Escape) )
+			{
+				LookFor.gameObject.SetActive (false);
+				Scroll2.SetActive (false);
+				Scroll1.SetActive (true);
+				Poisk = false;
+				for (int i = 0; i < M1.Count; i++) {
+					M1.RemoveAt (i);
+					Mas1.RemoveAt (i);
+				}
+				
+			}
+		}
 	}
 
 	public void ZapolnenieFaila(string Name){
-
-
-
 
 		List<string[]> Word = new List<string[]>();
 
@@ -197,7 +221,7 @@ public class WordInfo : MonoBehaviour {
 	}
 	void OnGUI()
 	{
-		if (Input.GetKeyUp(KeyCode.Escape) )
+		if (Input.GetKeyUp(KeyCode.Escape) && !Poisk )
 		{
 			SceneManager.LoadScene("StartScene");
 		}

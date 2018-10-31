@@ -7,7 +7,7 @@ using System.IO;
 [System.Serializable]
 public  class Saving{
 	public static string NameWordlist;
-
+	public static int Dropdown;
 	public void init(string op){
 		NameWordlist = op;
 	}

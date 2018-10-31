@@ -6,10 +6,11 @@ using UnityEngine.UI;
 public class ButtonClick : MonoBehaviour {
 
 	public int Integer;
-	public Text text;
+	public Text text; 
+	public int Theme;
 
 
 	public void click(){
-		GameObject.FindGameObjectWithTag ("Respawn").GetComponent<AddNewWordList> ().ClickBut (text.text,Integer);
+		GameObject.FindGameObjectWithTag ("Respawn").GetComponent<AddNewWordList> ().ClickBut (text.text,Integer, Theme);
 	}
 }
